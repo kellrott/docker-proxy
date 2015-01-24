@@ -45,6 +45,10 @@ class DockerHandler(tornado.web.RequestHandler):
             req = json.loads(self.request.body)
             new_req = self.filter_run_request(req)
             self.proxy(path, json.dumps(new_req), {"Content-Type" : "application/json"})
+        elif path.startswith( API_PREFIX + "/containers/" ):
+            print "CONTAINER:", path, self.request.arguments, self.request.body
+            self.proxy(path, self.request.body, {"Content-Type" : "application/json"})
+            
 
     def filter_run_request(self, request):
         logging.info("Filtering run request: %s" % (request))
@@ -59,7 +63,7 @@ class DockerHandler(tornado.web.RequestHandler):
             conn.request("POST", path, body, headers=headers)
         response = conn.getresponse()
         res_text = response.read()
-        print res_text
+        print "PROXY", res_text
         self.write(res_text)
         conn.close()
 
